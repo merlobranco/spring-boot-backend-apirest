@@ -75,8 +75,20 @@ public class ClienteRestController {
 	}
 	
 	@PutMapping("/clientes")
-	public Cliente update(@RequestBody Cliente cliente) {
-		return clienteService.save(cliente);
+	public ResponseEntity<?> update(@RequestBody Cliente cliente) {
+		Map<String, Object> response = new HashMap<>();
+		Cliente updatedCliente = null;
+		try {
+			updatedCliente = clienteService.save(cliente);
+		}
+		catch (DataAccessException e) {
+			response.put("mensaje", "Error al realizar el update en la base de datos!");
+			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		response.put("mensaje", "El cliente ha sido actualizado con éxito!");
+		response.put("cliente", updatedCliente);
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/clientes/{id}")
